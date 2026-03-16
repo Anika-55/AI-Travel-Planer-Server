@@ -8,9 +8,68 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String      @id @default(cuid())
+  email       String      @unique
+  name        String?
+  reviews     Review[]
+  savedTrips  SavedTrip[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  description  String?
+  destinations Destination[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Destination {
+  id          String      @id @default(cuid())
+  name        String
+  country     String
+  city        String?
+  description String?
+  imageUrl    String?
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  reviews     Review[]
+  savedTrips  SavedTrip[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([categoryId])
+}
+
+model Review {
+  id             String      @id @default(cuid())
+  rating         Int
+  comment        String?
+  userId         String
+  destinationId  String
+  user           User        @relation(fields: [userId], references: [id])
+  destination    Destination @relation(fields: [destinationId], references: [id])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([destinationId])
+}
+
+model SavedTrip {
+  id             String      @id @default(cuid())
+  userId         String
+  destinationId  String
+  startDate      DateTime?
+  endDate        DateTime?
+  notes          String?
+  user           User        @relation(fields: [userId], references: [id])
+  destination    Destination @relation(fields: [destinationId], references: [id])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([userId, destinationId])
+  @@index([destinationId])
 }
