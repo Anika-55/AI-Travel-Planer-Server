@@ -7,9 +7,45 @@ import {
   deleteDestination
 } from "../services/destinationService";
 
+function parseNumber(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 export async function list(req: Request, res: Response) {
-  const destinations = await listDestinations();
-  res.json(destinations);
+  const {
+    location,
+    price,
+    rating,
+    page,
+    limit,
+    sort
+  } = req.query as {
+    location?: string;
+    price?: string;
+    rating?: string;
+    page?: string;
+    limit?: string;
+    sort?: "price" | "rating" | "newest";
+  };
+
+  const minPrice = price ? parseNumber(price.split("-")[0]) : undefined;
+  const maxPrice = price ? parseNumber(price.split("-")[1]) : undefined;
+  const minRating = rating ? parseNumber(rating.split("-")[0]) : undefined;
+  const maxRating = rating ? parseNumber(rating.split("-")[1]) : undefined;
+
+  const result = await listDestinations({
+    location,
+    minPrice,
+    maxPrice,
+    minRating,
+    maxRating,
+    page: parseNumber(page),
+    limit: parseNumber(limit),
+    sort: sort ?? "newest"
+  });
+
+  res.json(result);
 }
 
 export async function getById(req: Request, res: Response) {
