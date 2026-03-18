@@ -1,7 +1,7 @@
 ﻿import { prisma } from "../config/prisma";
 import { env } from "../config/env";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { Secret, SignOptions } from "jsonwebtoken";
 
 export type AuthUser = {
   id: string;
@@ -17,6 +17,11 @@ const userSelect = {
   email: true,
   avatar: true,
   role: true
+};
+
+const jwtSecret = env.jwtSecret as Secret;
+const jwtOptions: SignOptions = {
+  expiresIn: env.jwtExpiresIn as SignOptions["expiresIn"]
 };
 
 export async function registerUser(input: {
@@ -42,9 +47,7 @@ export async function registerUser(input: {
     select: userSelect
   });
 
-  const token = jwt.sign({ sub: user.id, role: user.role }, env.jwtSecret, {
-    expiresIn: env.jwtExpiresIn
-  });
+  const token = jwt.sign({ sub: user.id, role: user.role }, jwtSecret, jwtOptions);
 
   return { user, token } as const;
 }
@@ -71,9 +74,7 @@ export async function loginUser(input: { email: string; password: string }) {
     role: userWithPassword.role
   };
 
-  const token = jwt.sign({ sub: user.id, role: user.role }, env.jwtSecret, {
-    expiresIn: env.jwtExpiresIn
-  });
+  const token = jwt.sign({ sub: user.id, role: user.role }, jwtSecret, jwtOptions);
 
   return { user, token } as const;
 }

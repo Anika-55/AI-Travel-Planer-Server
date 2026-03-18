@@ -1,11 +1,13 @@
 ﻿import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import { env } from "../config/env";
 
 export type AuthPayload = {
   sub: string;
   role: "USER" | "ADMIN";
 };
+
+const jwtSecret = env.jwtSecret as Secret;
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
@@ -16,7 +18,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = header.slice("Bearer ".length);
 
   try {
-    const payload = jwt.verify(token, env.jwtSecret) as AuthPayload;
+    const payload = jwt.verify(token, jwtSecret) as AuthPayload;
     req.user = { id: payload.sub, role: payload.role };
     return next();
   } catch {

@@ -72,3 +72,20 @@ model SavedTrip {
   @@unique([userId, destinationId])
   @@index([destinationId])
 }
+
+model AiMetric {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  promptLength  Int
+  latencyMs     Int
+  model         String
+  cacheHit      Boolean
+  fallbackUsed  Boolean
+  promptTokens  Int?
+  outputTokens  Int?
+  totalTokens   Int?
+  userId        String?
+
+  @@index([createdAt])
+  @@index([userId])
+}
